@@ -64,6 +64,9 @@ def list_customer_payments(customer_id: str, db: Session = Depends(get_db)):
 @router.post("/payments/{payment_id}/refund", response_model=PaymentOut)
 def refund_payment(payment_id: str, db: Session = Depends(get_db)):
     payment = db.get(Payment, payment_id)
+    if payment is None:
+        logger.warning("Payment not found: %s", payment_id)
+        raise HTTPException(status_code=404, detail="Payment not found")
     payment.status = "refunded"
     db.commit()
     db.refresh(payment)
